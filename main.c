@@ -32,7 +32,25 @@ const int cols = 8;
 const int TILE_SIZE = 100;
 
 
+struct Player{
+    int player_x;
+    int player_y;
+    int new_x;
+    int new_y;
 
+    int angle;
+    int speed;
+    double rot_speed;
+
+    int ray_length;
+    int max_depth;
+    int num_rays;
+
+    float fov;
+
+
+
+};
 
 
 
@@ -81,6 +99,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
 
+    struct Player player;
+
+    player.angle=0;player.player_x=350;player.player_y=250;
+    player.speed=10;player.rot_speed=0.10;player.ray_length=100;
+    player.fov = 3.13 /3;player.num_rays=800;player.max_depth=10000;
 
     return SDL_APP_CONTINUE; 
 }
