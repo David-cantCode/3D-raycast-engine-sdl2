@@ -1,12 +1,15 @@
-//compile gcc main.c -o window -lSDL3
+//compile gcc main.c -o window -lSDL3 -lm 
 // ./window
 
 
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_oldnames.h>
+#include <stdio.h>
+#include <sys/types.h>
 #define SDL_MAIN_USE_CALLBACKS 1  //use call back instead of main()
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-
+#include <math.h>
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
@@ -38,7 +41,7 @@ struct Player{
     int new_x;
     int new_y;
 
-    int angle;
+    double angle;
     int speed;
     double rot_speed;
 
@@ -53,7 +56,7 @@ struct Player{
 };
 
 
-
+struct Player player;
 
 void draw_map(){
     
@@ -74,10 +77,19 @@ void draw_map(){
     }
 
 
-    SDL_RenderPresent(renderer);
+   
 }
 
 
+
+void draw_player(){
+    SDL_FRect square = {player.player_x, player.player_y, 100, 100};
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);  
+        SDL_RenderFillRect(renderer, &square);
+        printf("\n %d" ,player.player_x);
+
+
+}
 
 
 
@@ -99,7 +111,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
 
-    struct Player player;
 
     player.angle=0;player.player_x=350;player.player_y=250;
     player.speed=10;player.rot_speed=0.10;player.ray_length=100;
@@ -116,6 +127,48 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS; 
     }
+
+        //********************************
+        //******PLAYER CONTROLLER**********
+        // *********************************
+
+
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+
+        player.new_x = player.player_x;
+        player.new_y = player.player_y;
+
+
+        switch (event->key.key){
+
+            case SDLK_A:
+                player.angle -= player.rot_speed;
+                break;
+
+            case SDLK_D:
+                player.angle -= player.rot_speed;
+                break;
+
+            case SDLK_W:
+                player.new_x += cos(player.angle) * player.speed;
+                player.new_y += sin(player.angle) * player.speed;
+                break;
+
+            case SDLK_S:
+                player.new_x -= cos(player.angle) * player.speed;
+                player.new_y -= sin(player.angle) * player.speed;
+                break;
+        
+            }
+        
+            //add constraints
+            player.player_x = player.new_x;
+            player.player_y = player.new_y;
+
+
+}
+
+
     return SDL_APP_CONTINUE;
 }
 
@@ -129,12 +182,13 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // black background
     SDL_RenderClear(renderer);
     draw_map();
+    draw_player();
 
 
 
 
 
-
+    SDL_RenderPresent(renderer);
 
 
     return SDL_APP_CONTINUE; 
